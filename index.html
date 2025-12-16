@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>게시판</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #e0f2fe 0%, #f9fafb 45%, #ffffff 100%);
+      color: #0f172a;
+    }
+
+    header {
+      padding: 12px 24px 16px;
+      border-bottom: 1px solid #dbeafe;
+      background: rgba(255,255,255,0.95);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: linear-gradient(to right, #3b82f6, #38bdf8);
+      color: #f9fafb;
+      font-weight: 800;
+      font-size: 20px;
+      box-shadow: 0 4px 10px rgba(37,99,235,0.4);
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: #4b5563;
+      margin-top: 4px;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .panel {
+      background: #ffffff;
+      border-radius: 18px;
+      border: 1px solid #dbeafe;
+      padding: 12px 12px 16px;
+      font-size: 14px;
+      box-shadow: 0 12px 25px rgba(15,23,42,0.07);
+      margin-bottom: 16px;
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1d4ed8;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .panel-title::before {
+      content: "🌸";
+      font-size: 13px;
+    }
+
+    .letter-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      color: #1d4ed8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .letter-sub {
+      font-size: 12px;
+      color: #4b5563;
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .letter-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .letter-form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .letter-form input[type="text"],
+    .letter-form textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid #cbd5f5;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 13px;
+      resize: vertical;
+    }
+
+    .letter-form textarea { min-height: 90px; }
+
+    .letter-form input[type="file"] {
+      font-size: 12px;
+      color: #374151;
+    }
+
+    .letter-form button {
+      align-self: flex-end;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(to right, #3b82f6, #6366f1);
+      color: #f9fafb;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(79,70,229,0.6);
+      transition: transform 0.08s ease, box-shadow 0.08s ease;
+    }
+
+    .letter-form button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(79,70,229,0.75);
+    }
+
+    .letter-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 13px;
+      max-height: 520px;
+      overflow-y: auto;
+    }
+
+    .letter-item { padding: 8px 0; border-radius: 12px; }
+
+    .letter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 4px;
+      padding: 0 4px;
+    }
+
+    .letter-name { font-weight: 600; font-size: 13px; color: #0f172a; }
+    .letter-tag { font-size: 11px; color: #2563eb; margin-left: 6px; }
+    .letter-time { font-size: 11px; color: #6b7280; }
+
+    .letter-bubble {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      background: #f3f4ff;
+      border-radius: 20px;
+      padding: 10px 12px;
+      border: 1px solid #dbeafe;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+
+    .letter-bubble::after {
+      content: "";
+      position: absolute;
+      left: 18px;
+      bottom: -7px;
+      width: 22px;
+      height: 12px;
+      background: #f3f4ff;
+      border-radius: 999px;
+    }
+
+    .letter-message {
+      font-size: 13px;
+      color: #111827;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      background: #ffffff;
+      padding: 8px 10px;
+      border-radius: 12px;
+    }
+
+    .letter-image {
+      margin-top: 8px;
+      border-radius: 12px;
+      max-width: 100%;
+      max-height: 260px;
+      object-fit: cover;
+      border: 1px solid #dbeafe;
+      background: #ffffff;
+    }
+
+    /* 답글 */
+    .reply-list {
+      margin-top: 4px;
+      margin-left: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .reply-item { display: flex; justify-content: flex-start; }
+
+    .reply-bubble {
+      max-width: 100%;
+      background: #e5f0ff;
+      border-radius: 16px;
+      padding: 8px 10px;
+      border: 1px solid #dbeafe;
+      font-size: 12px;
+    }
+
+    .reply-meta { font-size: 11px; color: #6b7280; margin-bottom: 2px; }
+
+    .reply-message {
+      font-size: 12px;
+      color: #111827;
+      white-space: pre-wrap;
+      background: #ffffff;
+      padding: 4px 6px;
+      border-radius: 8px;
+    }
+
+    .reply-toggle {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #2563eb;
+      background: transparent;
+      border: none;
+      padding: 0 4px;
+      cursor: pointer;
+    }
+
+    .reply-form {
+      margin-top: 6px;
+      margin-left: 24px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px dashed #dbeafe;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+      background: #f3f4ff;
+    }
+
+    .reply-form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .reply-form input[type="text"],
+    .reply-form textarea {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #cbd5f5;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 12px;
+      resize: vertical;
+    }
+
+    .reply-form button {
+      align-self: flex-end;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(to right, #3b82f6, #6366f1);
+      color: #f9fafb;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(79,70,229,0.45);
+    }
+
+    .reply-form button:hover { filter: brightness(0.98); }
+
+    .empty-text {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 6px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div>
+      <div class="logo">학교 게시판</div>
+      <div class="subtitle">익명/실명 · 이미지 1장 · 답글 기능</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="letter-title">게시판</div>
+      <div class="letter-sub">
+        하고 싶은 말, 익명으로 남기고 싶은 이야기, 운영진/관리자에게 전하고 싶은 메시지를 자유롭게 올려 주세요. (이미지 1장 첨부 가능)
+      </div>
+
+      <form class="letter-form" id="letter-form">
+        <div class="letter-form-row">
+          <label style="display:flex;align-items:center;gap:4px;font-size:12px;">
+            <input type="checkbox" id="letter-anon" checked />
+            익명으로 올리기
+          </label>
+        </div>
+
+        <div class="letter-form-row">
+          <input type="text" id="letter-name" placeholder="실명 또는 별명 (익명이 아니면 필수)" disabled />
+        </div>
+
+        <textarea id="letter-message" placeholder="게시글 내용을 자유롭게 적어 주세요. (기본적인 예의는 지키기!)"></textarea>
+
+        <div class="letter-form-row">
+          <span style="font-size:12px; color:#9ca3af;">이미지 첨부 (선택):</span>
+          <input type="file" id="letter-image" accept="image/*" />
+        </div>
+
+        <button type="submit">게시글 올리기</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">게시글 목록</div>
+      <div class="letter-sub">최신 순으로 최대 50개까지 보여집니다. (답글 가능)</div>
+
+      <div id="letter-list" class="letter-list"></div>
+      <div class="empty-text" id="letter-empty">아직 올라온 글이 없어요. 첫 번째 글의 주인공이 되어 보세요!</div>
+    </section>
+  </main>
+
+  <!-- Firebase SDK (Realtime DB만 사용) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    // ==============================
+    // Firebase 초기화
+    // ==============================
+      const firebaseConfig = {
+    apiKey: "AIzaSyBi_nICkysE0CCvkhPLV_3n2UUIKis88OA",
+    authDomain: "nakahara-af4d6.firebaseapp.com",
+    projectId: "nakahara-af4d6",
+    storageBucket: "nakahara-af4d6.firebasestorage.app",
+    messagingSenderId: "425522148986",
+    appId: "1:425522148986:web:9b187e5904083c70202dc3",
+    measurementId: "G-C60SDKSXHJ"
+  };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ==============================
+    // 게시판 (게시글 + 답글 + 이미지 base64)
+    // DB 구조:
+    // /letters/{letterId}
+    // /letterReplies/{letterId}/{replyId}
+    // ==============================
+    const letterAnonEl = document.getElementById('letter-anon');
+    const letterNameEl = document.getElementById('letter-name');
+    const letterMessageEl = document.getElementById('letter-message');
+    const letterImageEl = document.getElementById('letter-image');
+    const letterFormEl = document.getElementById('letter-form');
+    const letterListEl = document.getElementById('letter-list');
+    const letterEmptyEl = document.getElementById('letter-empty');
+
+    let letters = [];
+    let repliesData = {};
+
+    letterAnonEl.addEventListener('change', () => {
+      if (letterAnonEl.checked) {
+        letterNameEl.disabled = true;
+        letterNameEl.value = '';
+      } else {
+        letterNameEl.disabled = false;
+      }
+    });
+
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = e => reject(e);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    letterFormEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const isAnonymous = letterAnonEl.checked;
+      const nameInput = letterNameEl.value.trim();
+      const message = letterMessageEl.value.trim();
+      const file = letterImageEl.files[0];
+
+      if (!message) {
+        alert('게시글 내용을 입력해 주세요.');
+        return;
+      }
+      if (!isAnonymous && !nameInput) {
+        alert('익명이 아니라면 실명 또는 별명을 입력해 주세요.');
+        return;
+      }
+
+      const displayName = isAnonymous ? '익명' : nameInput;
+
+      try {
+        const newRef = db.ref('letters').push();
+
+        let imageData = null;
+        if (file) {
+          imageData = await readFileAsDataURL(file);
+        }
+
+        await newRef.set({
+          name: displayName,
+          isAnonymous: isAnonymous,
+          rawName: nameInput || null,
+          message: message,
+          imageData: imageData,
+          createdAt: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        letterMessageEl.value = '';
+        letterImageEl.value = '';
+        if (!isAnonymous) letterNameEl.value = '';
+
+        alert('게시글이 등록되었습니다.');
+      } catch (err) {
+        console.error(err);
+        alert('게시글 등록 중 오류가 발생했습니다.');
+      }
+    });
+
+    const lettersRef = db.ref('letters').limitToLast(50);
+    const repliesRootRef = db.ref('letterReplies');
+
+    lettersRef.on('value', snapshot => {
+      const val = snapshot.val();
+      if (!val) {
+        letters = [];
+        renderLetters();
+        return;
+      }
+      letters = Object.entries(val).map(([id, data]) => ({ id, ...data }));
+      letters.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      renderLetters();
+    });
+
+    repliesRootRef.on('value', snapshot => {
+      repliesData = snapshot.val() || {};
+      renderLetters();
+    });
+
+    function renderLetters() {
+      letterListEl.innerHTML = '';
+
+      if (!letters || letters.length === 0) {
+        letterEmptyEl.style.display = 'block';
+        return;
+      }
+      letterEmptyEl.style.display = 'none';
+
+      letters.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'letter-item';
+
+        const created = item.createdAt ? new Date(item.createdAt) : null;
+        const timeStr = created ? created.toLocaleString('ko-KR') : '';
+
+        const letterId = item.id;
+        const letterReplies = (repliesData && repliesData[letterId]) || {};
+        const replyArr = Object.entries(letterReplies)
+          .map(([rid, r]) => ({ id: rid, ...r }))
+          .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+        let repliesHtml = '';
+        replyArr.forEach(r => {
+          const rCreated = r.createdAt ? new Date(r.createdAt) : null;
+          const rTimeStr = rCreated ? rCreated.toLocaleString('ko-KR') : '';
+          const rName = r.name || '익명';
+          repliesHtml += `
+            <div class="reply-item">
+              <div class="reply-bubble">
+                <div class="reply-meta">${escapeHtml(rName)} · ${escapeHtml(rTimeStr)}</div>
+                <div class="reply-message">${escapeHtml(r.message || '')}</div>
+              </div>
+            </div>
+          `;
+        });
+
+        const imagePart = item.imageData
+          ? `<img class="letter-image" src="${item.imageData}" alt="첨부 이미지">`
+          : '';
+
+        div.innerHTML = `
+          <div class="letter-header">
+            <div>
+              <span class="letter-name">${escapeHtml(item.name || '익명')}</span>
+              ${item.isAnonymous ? '<span class="letter-tag">익명</span>' : '<span class="letter-tag">실명/닉네임</span>'}
+            </div>
+            <div class="letter-time">${escapeHtml(timeStr)}</div>
+          </div>
+
+          <div class="letter-bubble">
+            <div class="letter-message">${escapeHtml(item.message || '')}</div>
+            ${imagePart}
+          </div>
+
+          <div class="reply-list" data-letter-id="${letterId}">
+            ${repliesHtml}
+          </div>
+
+          <button class="reply-toggle" data-letter-id="${letterId}">답글 달기</button>
+
+          <form class="reply-form hidden" data-letter-id="${letterId}">
+            <div class="reply-form-row">
+              <label style="display:flex;align-items:center;gap:4px;">
+                <input type="checkbox" class="reply-anon" checked>
+                익명
+              </label>
+            </div>
+            <div class="reply-form-row">
+              <input type="text" class="reply-name" placeholder="실명/별명 (익명이 아니면 필수)" disabled>
+            </div>
+            <textarea class="reply-message-input" placeholder="답글 내용을 입력하세요."></textarea>
+            <button type="submit">답글 등록</button>
+          </form>
+        `;
+
+        letterListEl.appendChild(div);
+
+        const replyToggleBtn = div.querySelector('.reply-toggle');
+        const replyFormEl = div.querySelector('.reply-form');
+        const replyAnonEl = replyFormEl.querySelector('.reply-anon');
+        const replyNameEl = replyFormEl.querySelector('.reply-name');
+        const replyMsgEl = replyFormEl.querySelector('.reply-message-input');
+
+        replyToggleBtn.addEventListener('click', () => {
+          replyFormEl.classList.toggle('hidden');
+        });
+
+        replyAnonEl.addEventListener('change', () => {
+          if (replyAnonEl.checked) {
+            replyNameEl.disabled = true;
+            replyNameEl.value = '';
+          } else {
+            replyNameEl.disabled = false;
+          }
+        });
+
+        replyFormEl.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const isAnon = replyAnonEl.checked;
+          const nameVal = replyNameEl.value.trim();
+          const msgVal = replyMsgEl.value.trim();
+
+          if (!msgVal) {
+            alert('답글 내용을 입력해 주세요.');
+            return;
+          }
+          if (!isAnon && !nameVal) {
+            alert('익명이 아니라면 이름 또는 별명을 입력해 주세요.');
+            return;
+          }
+
+          const displayName = isAnon ? '익명' : nameVal;
+          const ref = db.ref('letterReplies/' + letterId).push();
+
+          ref.set({
+            name: displayName,
+            isAnonymous: isAnon,
+            rawName: nameVal || null,
+            message: msgVal,
+            createdAt: firebase.database.ServerValue.TIMESTAMP
+          }).then(() => {
+            replyMsgEl.value = '';
+            if (!isAnon) replyNameEl.value = '';
+          }).catch(err => {
+            console.error(err);
+            alert('답글 저장 중 오류가 발생했습니다.');
+          });
+        });
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+  </script>
+</body>
+</html>
